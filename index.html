@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Sesiones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.png">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            /* El padding ahora se gestiona con clases de Tailwind para un diseño adaptable */
+            box-sizing: border-box;
+        }
+
+        .view-section {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .active-view {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .fade-out {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        /* Efecto de slide para cambio de vistas */
+        .slide-in-right {
+            animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .slide-out-right {
+            animation: slideOutRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .slide-out-left {
+            animation: slideOutLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+
+        /* Efecto de zoom para el calendario */
+        .calendar-zoom-in {
+            animation: zoomIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .calendar-zoom-out {
+            animation: zoomOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomOut {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+        }
+
+        /* Efecto de pulse para botones */
+        .pulse-effect {
+            animation: pulse 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Efecto de bounce para eventos */
+        .bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .day-cell {
+            position: relative;
+            padding: 4px;
+            min-height: 80px; /* Altura ajustada para pantallas pequeñas */
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .day-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .event {
+            color: #fff;
+            padding: 2px 4px; /* Padding ajustado para pantallas pequeñas */
+            border-radius: 4px;
+            font-size: 0.7rem; /* Fuente ajustada para pantallas pequeñas */
+            margin-top: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .event:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        /* Ajustes para pantallas más grandes */
+        @media (min-width: 640px) { /* Breakpoint sm de Tailwind */
+            .day-cell {
+                min-height: 100px;
+                padding: 8px;
+            }
+            .event {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+                border-radius: 6px;
+            }
+        }
+
+        .alert-box {
+            background-color: #d1fae5;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #065f46;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            animation: slideInDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Efecto de shimmer para botones */
+        .shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shimmer-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .shimmer-effect:hover::before {
+            left: 100%;
+        }
+
+        /* Estilos para el filtro de clases */
+        .filter-btn {
+            position: relative;
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-btn.active-filter {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .filter-btn:not(.active-filter) {
+            opacity: 0.7;
+        }
+
+        .filter-btn:not(.active-filter):hover {
+            opacity: 1;
+        }
+
+        /* Animación para eventos filtrados */
+        .event-filtered {
+            animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .event-hidden {
+            display: none;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Efecto de pulse para botones de filtro */
+        .filter-pulse {
+            animation: filterPulse 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes filterPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Estilos para las miniaturas */
+        .miniature-calendar {
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .miniature-calendar:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #3b82f6;
+        }
+
+        .miniature-calendar.active {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .miniature-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: #3b82f6;
+            margin-bottom: 4px;
+            padding: 2px;
+        }
+
+        .miniature-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            font-size: 0.6rem;
+        }
+
+        .miniature-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+            font-size: 0.5rem;
+            font-weight: 500;
+        }
+
+        .miniature-day-header {
+            color: #6b7280;
+            font-weight: bold;
+            font-size: 0.4rem;
+        }
+
+        .miniature-day-empty {
+            background: #f9fafb;
+        }
+
+        .miniature-day-number {
+            background: white;
+            color: #374151;
+        }
+
+        .miniature-day-event {
+            background: #3b82f6;
+            color: white;
+            font-size: 0.3rem;
+            position: relative;
+        }
+
+        .miniature-day-event::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .miniature-day-event {
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Animación para cambio de vista */
+        .view-transition {
+            animation: viewTransition 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes viewTransition {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Margen inferior para el contenedor principal */
+        #app-container {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 flex flex-col h-screen">
+
+    <div id="app-container" class="p-2 sm:p-4 md:p-8">
+
+        <div id="header" class="flex justify-between items-center mb-4">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-blue-700">Gestor de Calendario</h1>
+        </div>
+
+        <!-- Filtro de Clases -->
+        <div id="class-filter" class="mb-4 p-3 bg-white rounded-xl shadow-lg">
+            <h3 class="text-sm font-semibold text-gray-700 mb-2">Filtrar por Clase:</h3>
+            <div id="class-buttons" class="flex flex-wrap gap-2">
+                <button class="filter-btn active-filter px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-all duration-200 text-xs font-medium shimmer-effect" data-filter="all">
+                    Todas las Clases
+                </button>
+                <!-- Los botones de clases se generarán dinámicamente -->
+            </div>
+        </div>
+
+
+
+        <!-- Calendar View -->
+        <div id="calendar-view" class="view-section">
+            <!-- Vista de Miniaturas -->
+            <div id="miniatures-view" class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-blue-700">Vista General del Año</h2>
+                    <button id="expand-calendar-btn" class="px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors duration-200 focus:outline-none text-sm shimmer-effect">
+                        📅 Vista Completa
+                    </button>
+                </div>
+                <div id="miniatures-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- Las miniaturas se generarán dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Vista Completa del Calendario -->
+            <div id="full-calendar-view" class="hidden mb-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 mb-4 bg-white rounded-xl shadow-lg space-y-2 sm:space-y-0">
+                    <div class="flex items-center space-x-1 sm:space-x-2">
+                        <button id="prev-month" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200 focus:outline-none shimmer-effect">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <h2 id="current-month" class="text-lg sm:text-xl md:text-3xl font-bold text-blue-700 text-center"></h2>
+                        <button id="next-month" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200 focus:outline-none shimmer-effect">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <button id="export-ics-btn" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200 focus:outline-none text-xs sm:text-sm text-center shimmer-effect">
+                            Añadir al Calendario
+                        </button>
+                        <button id="tutorial-btn" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200 focus:outline-none text-xs sm:text-sm text-center shimmer-effect">
+                            📖 Tutorial
+                        </button>
+                        <button id="back-to-miniatures-btn" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors duration-200 focus:outline-none text-xs sm:text-sm text-center shimmer-effect">
+                            ← Volver
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-gray-500 font-semibold mb-2 text-xs sm:text-base">
+                    <div>D</div>
+                    <div>L</div>
+                    <div>M</div>
+                    <div>X</div>
+                    <div>J</div>
+                    <div>V</div>
+                    <div>S</div>
+                </div>
+            
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2 md:gap-4 flex-grow bg-white p-2 sm:p-4 rounded-xl shadow-lg transition-opacity duration-500">
+                    <!-- Calendar days will be generated here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal for Event Details -->
+    <div id="event-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0" id="modal-container">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h3 id="modal-title" class="text-xl sm:text-2xl font-bold text-blue-700">Detalles del Evento</h3>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-gray-700 text-3xl leading-none font-semibold outline-none focus:outline-none">&times;</button>
+            </div>
+            <div id="modal-content" class="space-y-4 text-sm sm:text-base">
+                <!-- Event details will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Tutorial -->
+    <div id="tutorial-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl mx-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0" id="tutorial-modal-container">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h3 class="text-xl sm:text-2xl font-bold text-blue-700">📖 Tutorial: Importar a Gmail Calendar</h3>
+                <button id="tutorial-close-btn" class="text-gray-400 hover:text-gray-700 text-3xl leading-none font-semibold outline-none focus:outline-none">&times;</button>
+            </div>
+            <div class="space-y-4 text-sm sm:text-base">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-2">🎯 Pasos para importar eventos a Gmail Calendar:</h4>
+                    <ol class="list-decimal list-inside space-y-2 text-blue-700">
+                        <li>Haz clic en "Añadir al Calendario" para descargar el archivo .ics</li>
+                        <li>Abre tu Gmail Calendar en el navegador</li>
+                        <li>En el panel izquierdo, haz clic en el ícono de configuración ⚙️</li>
+                        <li>Selecciona "Configuración"</li>
+                        <li>Ve a la pestaña "Calendarios"</li>
+                        <li>Haz clic en "Importar calendario"</li>
+                        <li>Selecciona el archivo .ics que descargaste</li>
+                        <li>Elige el calendario donde quieres importar los eventos</li>
+                        <li>Haz clic en "Importar"</li>
+                    </ol>
+                </div>
+                
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-yellow-800 mb-2">📱 Alternativa para móviles:</h4>
+                    <p class="text-yellow-700">Si usas el móvil, puedes enviar el archivo .ics por email a tu cuenta de Gmail y abrirlo desde ahí.</p>
+                </div>
+
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">🎥 Video Tutorial:</h4>
+                    <p class="text-green-700 mb-3">Mira este video tutorial paso a paso:</p>
+                    <a href="https://www.youtube.com/watch?v=AMkUa4Q5TBM" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        Ver Tutorial en YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const today = new Date();
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+    
+        const appContainer = document.getElementById('app-container');
+        const calendarView = document.getElementById('calendar-view');
+
+        const calendarGrid = document.getElementById('calendar-grid');
+        const currentMonthDisplay = document.getElementById('current-month');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const exportIcsBtn = document.getElementById('export-ics-btn');
+
+
+        const eventModal = document.getElementById('event-modal');
+        const modalContainer = document.getElementById('modal-container');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        const tutorialBtn = document.getElementById('tutorial-btn');
+        const tutorialModal = document.getElementById('tutorial-modal');
+        const tutorialModalContainer = document.getElementById('tutorial-modal-container');
+        const tutorialCloseBtn = document.getElementById('tutorial-close-btn');
+
+        const classFilter = document.getElementById('class-filter');
+        const classButtons = document.getElementById('class-buttons');
+
+        const miniaturesView = document.getElementById('miniatures-view');
+        const fullCalendarView = document.getElementById('full-calendar-view');
+        const miniaturesGrid = document.getElementById('miniatures-grid');
+        const expandCalendarBtn = document.getElementById('expand-calendar-btn');
+        const backToMiniaturesBtn = document.getElementById('back-to-miniatures-btn');
+
+        let scheduleData = [];
+        let codeColors = {};
+        let uniqueCodes = [];
+        let currentFilter = 'all';
+        let currentView = 'miniatures';
+        
+
+        let localJsonData = '';
+        
+        const embeddedData = {
+            "schedule": [
+                {
+                    "code": "IA",
+                    "session": "Sesión 1",
+                    "topic": "Historia y evolución",
+                    "date": "2025-07-28",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 2",
+                    "topic": "Áreas principales de la IA",
+                    "date": "2025-07-29",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 3",
+                    "topic": "Condiciones del contexto",
+                    "date": "2025-07-30",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 4",
+                    "topic": "Plan de implementación para utilizar la IA ",
+                    "date": "2025-07-31",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 5",
+                    "topic": "Inteligencia artificial generativa ",
+                    "date": "2025-08-01",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 6",
+                    "topic": "Aplicaciones de la IA",
+                    "date": "2025-08-04",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 7",
+                    "topic": "IA en gestión de datos y toma de decisiones",
+                    "date": "2025-08-05",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 8",
+                    "topic": "IA en programación de computadores",
+                    "date": "2025-08-11",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 9",
+                    "topic": "Librerías Python para IA ",
+                    "date": "2025-08-12",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 10",
+                    "topic": "Librerías Scikit-learn y Seaborn",
+                    "date": "2025-08-14",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 11",
+                    "topic": "Análisis descriptivo y diagnóstico",
+                    "date": "2025-08-19",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 12",
+                    "topic": "Análisis predictivo",
+                    "date": "2025-08-20",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 13",
+                    "topic": "Análisis de sentimiento",
+                    "date": "2025-08-22",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 14",
+                    "topic": "Aprendizaje automático ",
+                    "date": "2025-08-25",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 15",
+                    "topic": "Aprendizaje supervisado ",
+                    "date": "2025-08-26",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 16",
+                    "topic": "Aprendizaje no supervisado",
+                    "date": "2025-08-27",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 17",
+                    "topic": "Aprendizaje inductivo",
+                    "date": "2025-08-29",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 18",
+                    "topic": "Aprendizaje por refuerzo",
+                    "date": "2025-09-01",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 19",
+                    "topic": "Machine Learning",
+                    "date": "2025-09-02",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 20",
+                    "topic": "Introducción a chatbots y asistentes virtuales",
+                    "date": "2025-09-03",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 21",
+                    "topic": "Chatbots 01 ",
+                    "date": "2025-09-05",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 22",
+                    "topic": "Chatbots 02",
+                    "date": "2025-09-08",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 23",
+                    "topic": "Asistentes 01",
+                    "date": "2025-09-09",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 24",
+                    "topic": "Asistentes 02",
+                    "date": "2025-09-10",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 25",
+                    "topic": "Asistentes virtuales ",
+                    "date": "2025-09-12",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 26",
+                    "topic": "Reto 1: Ecosistema de campaña publicitaria para industria de manufactura - Planeación de la campaña",
+                    "date": "2025-09-26",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 27",
+                    "topic": "Reto 2: Ecosistema de campaña publicitaria para industria de manufactura - Inventario de recursos",
+                    "date": "2025-09-30",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 28",
+                    "topic": "Reto 3: Ecosistema de campaña publicitaria para industria de manufactura - Ejecución y la finalización de la campaña",
+                    "date": "2025-10-01",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 29",
+                    "topic": "Reto 4: Ecosistema para la prestación de servicios de salud - Asignación de citas",
+                    "date": "2025-10-02",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 30",
+                    "topic": "Reto 5: Ecosistema para la prestación de servicios de salud - Atención a problemas de salud mental",
+                    "date": "2025-10-03",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 31",
+                    "topic": "Reto 6: Ecosistema para la prestación de servicios de salud - Atención de urgencias",
+                    "date": "2025-10-06",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 32",
+                    "topic": "Reto 7: Ecosistema para la prestación de servicios de salud - Intervención quirúrgica ",
+                    "date": "2025-10-07",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 33",
+                    "topic": "Reto 8: Ecosistema de distribución de equipos electrónicos - Computadores ",
+                    "date": "2025-10-08",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 34",
+                    "topic": "Reto 9: Ecosistema de distribución de equipos electrónicos - Accesorios eléctricos",
+                    "date": "2025-10-09",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "IA",
+                    "session": "Sesión 35",
+                    "topic": "Reto 10: Ecosistema de distribución de equipos electrónicos - Domótica",
+                    "date": "2025-10-10",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 1",
+                    "topic": "Fundamentos del Inglés Técnico en Tecnología",
+                    "date": "2025-08-06",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 2",
+                    "topic": "Videojuegos y Tecnologías Asociadas",
+                    "date": "2025-08-08",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 3",
+                    "topic": "Redes Sociales y Comunicación Digital",
+                    "date": "2025-08-13",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 4",
+                    "topic": "Inteligencia Artificial y Robótica",
+                    "date": "2025-08-15",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 5",
+                    "topic": "Programación de Computadores",
+                    "date": "2025-08-21",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 6",
+                    "topic": "Manejo de Imágenes y Videos",
+                    "date": "2025-08-28",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 7",
+                    "topic": "Impacto Social de la Tecnología y Blockchain",
+                    "date": "2025-09-04",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "ING",
+                    "session": "Sesión 8",
+                    "topic": "Internet de las Cosas (IoT) y Revisión General",
+                    "date": "2025-09-11",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "HP",
+                    "session": "Sesión 1",
+                    "topic": "Objetividad(es) y afectividad(es)",
+                    "date": "2025-09-15",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "HP",
+                    "session": "Sesión 2",
+                    "topic": "Comprensión y liderazgo",
+                    "date": "2025-09-18",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "HP",
+                    "session": "Sesión 3",
+                    "topic": "Gestión del conocimiento y cambio comportamental",
+                    "date": "2025-09-22",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "HP",
+                    "session": "Sesión 4",
+                    "topic": "Innovación y creatividad",
+                    "date": "2025-09-25",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "HP",
+                    "session": "Sesión 5",
+                    "topic": "Proyecto final",
+                    "date": "2025-09-29",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "PY",
+                    "session": "Sesión 1",
+                    "topic": "Introducción a la Gestión de Proyectos",
+                    "date": "2025-09-16",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "PY",
+                    "session": "Sesión 2",
+                    "topic": "Planificación y Organización de Proyectos",
+                    "date": "2025-09-17",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "PY",
+                    "session": "Sesión 3",
+                    "topic": "Ejecución y Monitoreo de Proyectos",
+                    "date": "2025-09-19",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "PY",
+                    "session": "Sesión 4",
+                    "topic": "Introducción a la Educación Financiera para Proyectos",
+                    "date": "2025-09-23",
+                    "time": "18:30:00 - 21:30:00"
+                },
+                {
+                    "code": "PY",
+                    "session": "Sesión 5",
+                    "topic": "Gestión Financiera y Estrategias Básicas",
+                    "date": "2025-09-24",
+                    "time": "18:30:00 - 21:30:00"
+                }
+            ],
+            "colors": {
+                "IA": "#005aeb",
+                "ING": "#ff00a2",
+                "HP": "#00db0f",
+                "PY": "#ff6600"
+            }
+        };
+
+        async function loadScheduleFromFile() {
+            if (window.location.protocol === 'file:') {
+                console.log('Running locally, using embedded data...');
+                localJsonData = JSON.stringify(embeddedData);
+                return localJsonData;
+            } else {
+                try {
+                    const response = await fetch('schedule.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.text();
+                    localJsonData = data;
+                    return data;
+                } catch (error) {
+                    console.error('Error loading schedule.json, using embedded data as fallback:', error);
+                    localJsonData = JSON.stringify(embeddedData);
+                    return localJsonData;
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+        function showModal(sessions) {
+            if (!Array.isArray(sessions)) sessions = [sessions];
+
+            modalTitle.textContent = sessions.length > 1 ? `Eventos del Día` : sessions[0].session;
+            modalContent.innerHTML = sessions.map(session => `
+                <div class="border-t border-gray-200 pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
+                    <p><strong class="font-semibold text-gray-800">Sesión:</strong> ${session.session}</p>
+                    <p><strong class="font-semibold text-gray-800">Tema:</strong> ${session.topic}</p>
+                    <p><strong class="font-semibold text-gray-800">Hora:</strong> ${session.time}</p>
+                    <p><strong class="font-semibold text-gray-800">Código:</strong> 
+                        <span class="font-mono py-1 px-2 rounded-md text-sm" style="background-color: ${codeColors[session.code] || '#9ca3af'}; color: #fff;">
+                            ${session.code}
+                        </span>
+                    </p>
+                </div>
+            `).join('');
+            
+            eventModal.style.display = 'flex';
+            setTimeout(() => {
+                modalContainer.classList.remove('scale-95', 'opacity-0');
+                modalContainer.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function hideModal() {
+            modalContainer.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                eventModal.style.display = 'none';
+            }, 200);
+        }
+
+        modalCloseBtn.addEventListener('click', hideModal);
+        eventModal.addEventListener('click', (event) => {
+            if (event.target === eventModal) hideModal();
+        });
+
+        function showTutorialModal() {
+            tutorialModal.style.display = 'flex';
+            setTimeout(() => {
+                tutorialModalContainer.classList.remove('scale-95', 'opacity-0');
+                tutorialModalContainer.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function hideTutorialModal() {
+            tutorialModalContainer.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                tutorialModal.style.display = 'none';
+            }, 200);
+        }
+
+        tutorialBtn.addEventListener('click', showTutorialModal);
+        tutorialCloseBtn.addEventListener('click', hideTutorialModal);
+        tutorialModal.addEventListener('click', (event) => {
+            if (event.target === tutorialModal) hideTutorialModal();
+        });
+
+
+        function generateICSFile() {
+            let icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Gemini//Calendario v1.0//ES',
+            ];
+
+            scheduleData.forEach(session => {
+                const startDate = new Date(`${session.date}T${session.time.split(' - ')[0]}`);
+                const endDate = new Date(`${session.date}T${session.time.split(' - ')[1]}`);
+
+
+                const toUTCString = (date) => {
+                    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                };
+
+                const event = [
+                    'BEGIN:VEVENT',
+                    `UID:${session.date}-${session.session.replace(/\s+/g, '-')}`,
+                    `DTSTAMP:${toUTCString(new Date())}`,
+                    `DTSTART:${toUTCString(startDate)}`,
+                    `DTEND:${toUTCString(endDate)}`,
+                    `SUMMARY:${session.session} - ${session.topic}`,
+                    `DESCRIPTION:Curso: ${session.code} - Tema: ${session.topic}`,
+                    'END:VEVENT'
+                ];
+                icsContent.push(...event);
+            });
+
+            icsContent.push('END:VCALENDAR');
+
+            const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'calendario_sesiones.ics';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        exportIcsBtn.addEventListener('click', generateICSFile);
+
+
+        function renderCalendar(month, year) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const endDate = lastDay.getDate();
+    
+            currentMonthDisplay.textContent = `${monthNames[month]} ${year}`;
+            calendarGrid.innerHTML = '';
+    
+            for (let i = 0; i < startDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('day-cell', 'rounded-lg', 'bg-gray-50');
+                calendarGrid.appendChild(emptyCell);
+            }
+    
+            for (let i = 1; i <= endDate; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day-cell', 'rounded-lg', 'bg-gray-50', 'shadow-sm');
+                const dayNumber = document.createElement('span');
+                dayNumber.classList.add('text-sm', 'sm:text-lg', 'font-semibold', 'text-gray-900');
+                dayNumber.textContent = i;
+                dayCell.appendChild(dayNumber);
+    
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const sessionsForDay = scheduleData.filter(s => s.date === dateKey);
+
+                sessionsForDay.forEach((session, index) => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.style.backgroundColor = codeColors[session.code] || '#9ca3af';
+                    eventDiv.classList.add('event', 'cursor-pointer');
+                    eventDiv.setAttribute('data-code', session.code);
+                    eventDiv.textContent = session.topic;
+                    eventDiv.title = `${session.session} - ${session.topic}`;
+                    
+                    // Aplicar efecto de bounce con delay escalonado
+                    setTimeout(() => {
+                        eventDiv.classList.add('bounce-in');
+                    }, index * 100);
+                    
+                    eventDiv.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Efecto de pulse al hacer clic
+                        eventDiv.classList.add('pulse-effect');
+                        setTimeout(() => eventDiv.classList.remove('pulse-effect'), 300);
+                        showModal(session);
+                    });
+
+                    dayCell.appendChild(eventDiv);
+                });
+    
+                if (sessionsForDay.length > 0) {
+                    dayCell.classList.add('cursor-pointer', 'hover:bg-blue-50', 'transition-colors', 'duration-200');
+                    dayCell.addEventListener('click', () => {
+                        showModal(sessionsForDay);
+                    });
+                }
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+    
+        function animateCalendarChange(direction) {
+            // Aplicar efecto de zoom out
+            calendarGrid.classList.add('calendar-zoom-out');
+            
+            // Efecto de pulse en los botones
+            if (direction === 'next') {
+                nextMonthBtn.classList.add('pulse-effect');
+                setTimeout(() => nextMonthBtn.classList.remove('pulse-effect'), 300);
+            } else {
+                prevMonthBtn.classList.add('pulse-effect');
+                setTimeout(() => prevMonthBtn.classList.remove('pulse-effect'), 300);
+            }
+            
+            setTimeout(() => {
+                if (direction === 'next') {
+                    currentMonth = (currentMonth + 1) % 12;
+                    if (currentMonth === 0) currentYear++;
+                } else {
+                    currentMonth = (currentMonth - 1 + 12) % 12;
+                    if (currentMonth === 11) currentYear--;
+                }
+                renderCalendar(currentMonth, currentYear);
+                
+                // Aplicar efecto de zoom in
+                calendarGrid.classList.remove('calendar-zoom-out');
+                calendarGrid.classList.add('calendar-zoom-in');
+                
+                setTimeout(() => {
+                    calendarGrid.classList.remove('calendar-zoom-in');
+                }, 400);
+            }, 200);
+        }
+    
+        prevMonthBtn.addEventListener('click', () => animateCalendarChange('prev'));
+        nextMonthBtn.addEventListener('click', () => animateCalendarChange('next'));
+
+        // Event listeners para navegación entre vistas
+        expandCalendarBtn.addEventListener('click', () => {
+            expandCalendarBtn.classList.add('pulse-effect');
+            setTimeout(() => expandCalendarBtn.classList.remove('pulse-effect'), 300);
+            showFullCalendarView();
+        });
+
+        backToMiniaturesBtn.addEventListener('click', () => {
+            backToMiniaturesBtn.classList.add('pulse-effect');
+            setTimeout(() => backToMiniaturesBtn.classList.remove('pulse-effect'), 300);
+            showMiniaturesView();
+        });
+
+
+        function generateClassFilterButtons() {
+            // Limpiar botones existentes excepto "Todas las Clases"
+            const allButton = classButtons.querySelector('[data-filter="all"]');
+            classButtons.innerHTML = '';
+            classButtons.appendChild(allButton);
+
+            // Agregar evento al botón "Todas las Clases"
+            allButton.addEventListener('click', () => {
+                // Remover clase activa de todos los botones
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active-filter');
+                });
+                
+                // Agregar clase activa al botón "Todas las Clases"
+                allButton.classList.add('active-filter');
+                
+                // Aplicar efecto de pulse
+                allButton.classList.add('filter-pulse');
+                setTimeout(() => allButton.classList.remove('filter-pulse'), 300);
+                
+                // Aplicar filtro
+                currentFilter = 'all';
+                applyFilter();
+            });
+
+            // Generar botones para cada clase
+            Object.keys(codeColors).forEach(code => {
+                const button = document.createElement('button');
+                button.className = 'filter-btn px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-medium shimmer-effect';
+                button.setAttribute('data-filter', code);
+                button.style.backgroundColor = codeColors[code];
+                button.style.color = '#ffffff';
+                button.textContent = code;
+                
+                // Efecto de pulse al hacer clic
+                button.addEventListener('click', () => {
+                    // Remover clase activa de todos los botones
+                    document.querySelectorAll('.filter-btn').forEach(btn => {
+                        btn.classList.remove('active-filter');
+                    });
+                    
+                    // Agregar clase activa al botón clickeado
+                    button.classList.add('active-filter');
+                    
+                    // Aplicar efecto de pulse
+                    button.classList.add('filter-pulse');
+                    setTimeout(() => button.classList.remove('filter-pulse'), 300);
+                    
+                    // Aplicar filtro
+                    currentFilter = code;
+                    applyFilter();
+                });
+                
+                classButtons.appendChild(button);
+            });
+        }
+
+        function generateMiniatures() {
+            miniaturesGrid.innerHTML = '';
+            
+            for (let month = 0; month < 12; month++) {
+                const miniature = document.createElement('div');
+                miniature.className = 'miniature-calendar';
+                miniature.setAttribute('data-month', month);
+                
+                const monthName = monthNames[month];
+                const year = currentYear;
+                
+                // Crear header de la miniatura
+                const header = document.createElement('div');
+                header.className = 'miniature-header';
+                header.textContent = monthName;
+                
+                // Crear grid de días
+                const daysGrid = document.createElement('div');
+                daysGrid.className = 'miniature-days';
+                
+                // Agregar headers de días de la semana
+                const dayHeaders = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+                dayHeaders.forEach(day => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'miniature-day miniature-day-header';
+                    dayHeader.textContent = day;
+                    daysGrid.appendChild(dayHeader);
+                });
+                
+                // Generar días del mes
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const startDay = firstDay.getDay();
+                const endDate = lastDay.getDate();
+                
+                // Agregar días vacíos al inicio
+                for (let i = 0; i < startDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'miniature-day miniature-day-empty';
+                    daysGrid.appendChild(emptyDay);
+                }
+                
+                // Agregar días del mes
+                for (let i = 1; i <= endDate; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'miniature-day miniature-day-number';
+                    dayCell.textContent = i;
+                    
+                    // Verificar si hay eventos en este día
+                    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                    const sessionsForDay = scheduleData.filter(s => s.date === dateKey);
+                    
+                    if (sessionsForDay.length > 0) {
+                        dayCell.classList.remove('miniature-day-number');
+                        dayCell.classList.add('miniature-day-event');
+                        
+                        // Aplicar color del primer evento del día y agregar data-code
+                        const firstEvent = sessionsForDay[0];
+                        dayCell.style.backgroundColor = codeColors[firstEvent.code] || '#3b82f6';
+                        dayCell.setAttribute('data-code', firstEvent.code);
+                    }
+                    
+                    daysGrid.appendChild(dayCell);
+                }
+                
+                miniature.appendChild(header);
+                miniature.appendChild(daysGrid);
+                
+                // Evento de clic para expandir la miniatura
+                miniature.addEventListener('click', () => {
+                    currentMonth = month;
+                    currentYear = year;
+                    showFullCalendarView();
+                });
+                
+                miniaturesGrid.appendChild(miniature);
+            }
+            
+            // Aplicar filtro actual después de generar las miniaturas
+            if (currentFilter !== 'all') {
+                applyFilter();
+            }
+        }
+
+        function showFullCalendarView() {
+            miniaturesView.classList.add('hidden');
+            fullCalendarView.classList.remove('hidden');
+            fullCalendarView.classList.add('view-transition');
+            currentView = 'full';
+            
+            // Renderizar el calendario completo
+            renderCalendar(currentMonth, currentYear);
+            
+            // Aplicar filtro actual si existe
+            if (currentFilter !== 'all') {
+                applyFilter();
+            }
+        }
+
+        function showMiniaturesView() {
+            fullCalendarView.classList.add('hidden');
+            miniaturesView.classList.remove('hidden');
+            miniaturesView.classList.add('view-transition');
+            currentView = 'miniatures';
+            
+            // Regenerar miniaturas para reflejar cambios
+            generateMiniatures();
+        }
+
+        function applyFilter() {
+            // Aplicar filtro a eventos en vista completa
+            const events = document.querySelectorAll('.event');
+            
+            events.forEach(event => {
+                const eventCode = event.getAttribute('data-code');
+                
+                if (currentFilter === 'all' || eventCode === currentFilter) {
+                    event.classList.remove('event-hidden');
+                    event.classList.add('event-filtered');
+                } else {
+                    event.classList.add('event-hidden');
+                    event.classList.remove('event-filtered');
+                }
+            });
+            
+            // Aplicar filtro a miniaturas
+            const miniatureDays = document.querySelectorAll('.miniature-day-event');
+            
+            miniatureDays.forEach(day => {
+                const dayCode = day.getAttribute('data-code');
+                
+                if (currentFilter === 'all' || dayCode === currentFilter) {
+                    day.style.opacity = '1';
+                    day.style.visibility = 'visible';
+                    day.style.transform = 'scale(1)';
+                } else {
+                    day.style.opacity = '0.2';
+                    day.style.visibility = 'visible';
+                    day.style.transform = 'scale(0.8)';
+                }
+            });
+            
+            // Remover clase de animación después de completar
+            setTimeout(() => {
+                events.forEach(event => {
+                    event.classList.remove('event-filtered');
+                });
+            }, 400);
+        }
+
+        async function loadScheduleFromJSON() {
+            try {
+                await loadScheduleFromFile();
+                const data = JSON.parse(localJsonData);
+                scheduleData = data.schedule;
+                codeColors = data.colors;
+                generateClassFilterButtons();
+                generateMiniatures();
+                
+                if (currentView === 'full') {
+                    renderCalendar(currentMonth, currentYear);
+                }
+            } catch (e) {
+                console.error("Error al parsear el JSON de datos:", e);
+                scheduleData = [];
+                codeColors = {};
+                generateMiniatures();
+                
+                if (currentView === 'full') {
+                    renderCalendar(currentMonth, currentYear);
+                }
+            }
+        }
+
+
+        // Función para inicializar con animación
+        function initializeApp() {
+            classFilter.style.display = 'block';
+            calendarView.classList.add('active-view');
+            
+            // Cargar datos y mostrar miniaturas
+            loadScheduleFromJSON();
+        }
+
+        // Inicializar después de un pequeño delay para permitir que las animaciones se carguen
+        setTimeout(initializeApp, 100);
+    </script>
+
+</body>
+
+</html>
