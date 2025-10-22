@@ -41,7 +41,7 @@
             opacity: 1;
             transform: translateX(0);
         }
-        
+
         .fade-out {
             opacity: 0;
             transform: translateX(-100%);
@@ -446,35 +446,27 @@
             <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-blue-700">Gestor de Calendario</h1>
         </div>
 
-        <!-- Filtro de Clases -->
         <div id="class-filter" class="mb-4 p-3 bg-white rounded-xl shadow-lg">
             <h3 class="text-sm font-semibold text-gray-700 mb-2">Filtrar por Clase:</h3>
             <div id="class-buttons" class="flex flex-wrap gap-2">
                 <button class="filter-btn active-filter px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-all duration-200 text-xs font-medium shimmer-effect" data-filter="all">
                     Todas las Clases
                 </button>
-                <!-- Los botones de clases se generarán dinámicamente -->
-            </div>
+                </div>
         </div>
 
-
-
-        <!-- Calendar View -->
         <div id="calendar-view" class="view-section">
-            <!-- Vista de Miniaturas -->
             <div id="miniatures-view" class="mb-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-blue-700">Vista General del Año</h2>
+                    <h2 class="text-xl font-bold text-blue-700">Vista General (Octubre - Noviembre 2025)</h2>
                     <button id="expand-calendar-btn" class="px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors duration-200 focus:outline-none text-sm shimmer-effect">
                         📅 Vista Completa
                     </button>
                 </div>
-                <div id="miniatures-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <!-- Las miniaturas se generarán dinámicamente -->
-                </div>
+                <div id="miniatures-grid" class="grid grid-cols-2 gap-4"> 
+                    </div>
             </div>
 
-            <!-- Vista Completa del Calendario -->
             <div id="full-calendar-view" class="hidden mb-6">
                 <div class="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-4 mb-4 bg-white rounded-xl shadow-lg space-y-2 sm:space-y-0">
                     <div class="flex items-center space-x-1 sm:space-x-2">
@@ -502,7 +494,7 @@
                         </button>
                     </div>
                 </div>
-            
+
                 <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-gray-500 font-semibold mb-2 text-xs sm:text-base">
                     <div>D</div>
                     <div>L</div>
@@ -512,16 +504,14 @@
                     <div>V</div>
                     <div>S</div>
                 </div>
-            
+
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2 md:gap-4 flex-grow bg-white p-2 sm:p-4 rounded-xl shadow-lg transition-opacity duration-500">
-                    <!-- Calendar days will be generated here by JavaScript -->
-                </div>
+                    </div>
             </div>
         </div>
 
     </div>
 
-    <!-- Modal for Event Details -->
     <div id="event-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0" id="modal-container">
             <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
@@ -529,12 +519,10 @@
                 <button id="modal-close-btn" class="text-gray-400 hover:text-gray-700 text-3xl leading-none font-semibold outline-none focus:outline-none">&times;</button>
             </div>
             <div id="modal-content" class="space-y-4 text-sm sm:text-base">
-                <!-- Event details will be injected here by JavaScript -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Modal for Tutorial -->
     <div id="tutorial-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" style="display: none;">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl mx-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0" id="tutorial-modal-container">
             <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
@@ -556,7 +544,7 @@
                         <li>Haz clic en "Importar"</li>
                     </ol>
                 </div>
-                
+
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-yellow-800 mb-2">📱 Alternativa para móviles:</h4>
                     <p class="text-yellow-700">Si usas el móvil, puedes enviar el archivo .ics por email a tu cuenta de Gmail y abrirlo desde ahí.</p>
@@ -579,9 +567,11 @@
     <script>
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         const today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
-    
+        
+        // MODIFICACIÓN: Fija el calendario a Octubre de 2025 y restringe el rango.
+        let currentMonth = 9; // Octubre (índice 9)
+        let currentYear = 2025;
+        
         const appContainer = document.getElementById('app-container');
         const calendarView = document.getElementById('calendar-view');
 
@@ -621,379 +611,62 @@
 
         let localJsonData = '';
         
+        // MODIFICACIÓN: JSON con las fechas de Octubre/Noviembre 2025 y 2 sesiones/día
         const embeddedData = {
             "schedule": [
-                {
-                    "code": "IA",
-                    "session": "Sesión 1",
-                    "topic": "Historia y evolución",
-                    "date": "2025-07-28",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 2",
-                    "topic": "Áreas principales de la IA",
-                    "date": "2025-07-29",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 3",
-                    "topic": "Condiciones del contexto",
-                    "date": "2025-07-30",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 4",
-                    "topic": "Plan de implementación para utilizar la IA ",
-                    "date": "2025-07-31",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 5",
-                    "topic": "Inteligencia artificial generativa ",
-                    "date": "2025-08-01",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 6",
-                    "topic": "Aplicaciones de la IA",
-                    "date": "2025-08-04",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 7",
-                    "topic": "IA en gestión de datos y toma de decisiones",
-                    "date": "2025-08-05",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 8",
-                    "topic": "IA en programación de computadores",
-                    "date": "2025-08-11",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 9",
-                    "topic": "Librerías Python para IA ",
-                    "date": "2025-08-12",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 10",
-                    "topic": "Librerías Scikit-learn y Seaborn",
-                    "date": "2025-08-14",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 11",
-                    "topic": "Análisis descriptivo y diagnóstico",
-                    "date": "2025-08-19",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 12",
-                    "topic": "Análisis predictivo",
-                    "date": "2025-08-20",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 13",
-                    "topic": "Análisis de sentimiento",
-                    "date": "2025-08-22",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 14",
-                    "topic": "Aprendizaje automático ",
-                    "date": "2025-08-25",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 15",
-                    "topic": "Aprendizaje supervisado ",
-                    "date": "2025-08-26",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 16",
-                    "topic": "Aprendizaje no supervisado",
-                    "date": "2025-08-27",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 17",
-                    "topic": "Aprendizaje inductivo",
-                    "date": "2025-08-29",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 18",
-                    "topic": "Aprendizaje por refuerzo",
-                    "date": "2025-09-01",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 19",
-                    "topic": "Machine Learning",
-                    "date": "2025-09-02",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 20",
-                    "topic": "Introducción a chatbots y asistentes virtuales",
-                    "date": "2025-09-03",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 21",
-                    "topic": "Chatbots 01 ",
-                    "date": "2025-09-05",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 22",
-                    "topic": "Chatbots 02",
-                    "date": "2025-09-08",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 23",
-                    "topic": "Asistentes 01",
-                    "date": "2025-09-09",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 24",
-                    "topic": "Asistentes 02",
-                    "date": "2025-09-10",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 25",
-                    "topic": "Asistentes virtuales ",
-                    "date": "2025-09-12",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 26",
-                    "topic": "Reto 1: Ecosistema de campaña publicitaria para industria de manufactura - Planeación de la campaña",
-                    "date": "2025-09-26",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 27",
-                    "topic": "Reto 2: Ecosistema de campaña publicitaria para industria de manufactura - Inventario de recursos",
-                    "date": "2025-09-30",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 28",
-                    "topic": "Reto 3: Ecosistema de campaña publicitaria para industria de manufactura - Ejecución y la finalización de la campaña",
-                    "date": "2025-10-01",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 29",
-                    "topic": "Reto 4: Ecosistema para la prestación de servicios de salud - Asignación de citas",
-                    "date": "2025-10-02",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 30",
-                    "topic": "Reto 5: Ecosistema para la prestación de servicios de salud - Atención a problemas de salud mental",
-                    "date": "2025-10-03",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 31",
-                    "topic": "Reto 6: Ecosistema para la prestación de servicios de salud - Atención de urgencias",
-                    "date": "2025-10-06",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 32",
-                    "topic": "Reto 7: Ecosistema para la prestación de servicios de salud - Intervención quirúrgica ",
-                    "date": "2025-10-07",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 33",
-                    "topic": "Reto 8: Ecosistema de distribución de equipos electrónicos - Computadores ",
-                    "date": "2025-10-08",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 34",
-                    "topic": "Reto 9: Ecosistema de distribución de equipos electrónicos - Accesorios eléctricos",
-                    "date": "2025-10-09",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "IA",
-                    "session": "Sesión 35",
-                    "topic": "Reto 10: Ecosistema de distribución de equipos electrónicos - Domótica",
-                    "date": "2025-10-10",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 1",
-                    "topic": "Fundamentos del Inglés Técnico en Tecnología",
-                    "date": "2025-08-06",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 2",
-                    "topic": "Videojuegos y Tecnologías Asociadas",
-                    "date": "2025-08-08",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 3",
-                    "topic": "Redes Sociales y Comunicación Digital",
-                    "date": "2025-08-13",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 4",
-                    "topic": "Inteligencia Artificial y Robótica",
-                    "date": "2025-08-15",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 5",
-                    "topic": "Programación de Computadores",
-                    "date": "2025-08-21",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 6",
-                    "topic": "Manejo de Imágenes y Videos",
-                    "date": "2025-08-28",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 7",
-                    "topic": "Impacto Social de la Tecnología y Blockchain",
-                    "date": "2025-09-04",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "ING",
-                    "session": "Sesión 8",
-                    "topic": "Internet de las Cosas (IoT) y Revisión General",
-                    "date": "2025-09-11",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "HP",
-                    "session": "Sesión 1",
-                    "topic": "Objetividad(es) y afectividad(es)",
-                    "date": "2025-09-15",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "HP",
-                    "session": "Sesión 2",
-                    "topic": "Comprensión y liderazgo",
-                    "date": "2025-09-18",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "HP",
-                    "session": "Sesión 3",
-                    "topic": "Gestión del conocimiento y cambio comportamental",
-                    "date": "2025-09-22",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "HP",
-                    "session": "Sesión 4",
-                    "topic": "Innovación y creatividad",
-                    "date": "2025-09-25",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "HP",
-                    "session": "Sesión 5",
-                    "topic": "Proyecto final",
-                    "date": "2025-09-29",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "PY",
-                    "session": "Sesión 1",
-                    "topic": "Introducción a la Gestión de Proyectos",
-                    "date": "2025-09-16",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "PY",
-                    "session": "Sesión 2",
-                    "topic": "Planificación y Organización de Proyectos",
-                    "date": "2025-09-17",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "PY",
-                    "session": "Sesión 3",
-                    "topic": "Ejecución y Monitoreo de Proyectos",
-                    "date": "2025-09-19",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "PY",
-                    "session": "Sesión 4",
-                    "topic": "Introducción a la Educación Financiera para Proyectos",
-                    "date": "2025-09-23",
-                    "time": "18:30:00 - 21:30:00"
-                },
-                {
-                    "code": "PY",
-                    "session": "Sesión 5",
-                    "topic": "Gestión Financiera y Estrategias Básicas",
-                    "date": "2025-09-24",
-                    "time": "18:30:00 - 21:30:00"
-                }
+                { "code": "IA", "session": "Sesión 1", "topic": "Historia y evolución", "date": "2025-10-20", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 2", "topic": "Áreas principales de la IA", "date": "2025-10-20", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 3", "topic": "Condiciones del contexto", "date": "2025-10-21", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 4", "topic": "Plan de implementación para utilizar la IA ", "date": "2025-10-21", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 5", "topic": "Inteligencia artificial generativa ", "date": "2025-10-23", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 6", "topic": "Aplicaciones de la IA", "date": "2025-10-23", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 7", "topic": "IA en gestión de datos y toma de decisiones", "date": "2025-10-24", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 8", "topic": "IA en programación de computadores", "date": "2025-10-24", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 9", "topic": "Librerías Python para IA ", "date": "2025-10-27", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 10", "topic": "Librerías Scikit-learn y Seaborn", "date": "2025-10-27", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 11", "topic": "Análisis descriptivo y diagnóstico", "date": "2025-10-28", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 12", "topic": "Análisis predictivo", "date": "2025-10-28", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 13", "topic": "Análisis de sentimiento", "date": "2025-10-29", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 14", "topic": "Aprendizaje automático ", "date": "2025-10-29", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 15", "topic": "Aprendizaje supervisado ", "date": "2025-10-30", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 16", "topic": "Aprendizaje no supervisado", "date": "2025-10-30", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 17", "topic": "Aprendizaje inductivo", "date": "2025-10-31", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 18", "topic": "Aprendizaje por refuerzo", "date": "2025-10-31", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 19", "topic": "Machine Learning", "date": "2025-11-06", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 20", "topic": "Introducción a chatbots y asistentes virtuales", "date": "2025-11-06", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 21", "topic": "Chatbots 01 ", "date": "2025-11-07", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 22", "topic": "Chatbots 02", "date": "2025-11-07", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 23", "topic": "Asistentes 01", "date": "2025-11-10", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 24", "topic": "Asistentes 02", "date": "2025-11-10", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 25", "topic": "Asistentes virtuales ", "date": "2025-11-11", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 26", "topic": "Reto 1: Ecosistema de campaña publicitaria para industria de manufactura - Planeación de la campaña", "date": "2025-11-11", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 27", "topic": "Reto 2: Ecosistema de campaña publicitaria para industria de manufactura - Inventario de recursos", "date": "2025-11-20", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 28", "topic": "Reto 3: Ecosistema de campaña publicitaria para industria de manufactura - Ejecución y la finalización de la campaña", "date": "2025-11-20", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 29", "topic": "Reto 4: Ecosistema para la prestación de servicios de salud - Asignación de citas", "date": "2025-11-21", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 30", "topic": "Reto 5: Ecosistema para la prestación de servicios de salud - Atención a problemas de salud mental", "date": "2025-11-21", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 31", "topic": "Reto 6: Ecosistema para la prestación de servicios de salud - Atención de urgencias", "date": "2025-11-24", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 32", "topic": "Reto 7: Ecosistema para la prestación de servicios de salud - Intervención quirúrgica ", "date": "2025-11-24", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 33", "topic": "Reto 8: Ecosistema de distribución de equipos electrónicos - Computadores ", "date": "2025-11-26", "time": "18:00:00 - 20:15:00" },
+                { "code": "IA", "session": "Sesión 34", "topic": "Reto 9: Ecosistema de distribución de equipos electrónicos - Accesorios eléctricos", "date": "2025-11-26", "time": "20:15:00 - 22:30:00" },
+                { "code": "IA", "session": "Sesión 35", "topic": "Reto 10: Ecosistema de distribución de equipos electrónicos - Domótica", "date": "2025-11-28", "time": "18:00:00 - 20:15:00" },
+                { "code": "ING", "session": "Sesión 1", "topic": "Fundamentos del Inglés Técnico en Tecnología", "date": "2025-10-22", "time": "18:00:00 - 20:15:00" },
+                { "code": "ING", "session": "Sesión 2", "topic": "Videojuegos y Tecnologías Asociadas", "date": "2025-10-22", "time": "20:15:00 - 22:30:00" },
+                { "code": "ING", "session": "Sesión 3", "topic": "Redes Sociales y Comunicación Digital", "date": "2025-11-04", "time": "18:00:00 - 20:15:00" },
+                { "code": "ING", "session": "Sesión 4", "topic": "Inteligencia Artificial y Robótica", "date": "2025-11-04", "time": "20:15:00 - 22:30:00" },
+                { "code": "ING", "session": "Sesión 5", "topic": "Programación de Computadores", "date": "2025-11-25", "time": "18:00:00 - 20:15:00" },
+                { "code": "ING", "session": "Sesión 6", "topic": "Manejo de Imágenes y Videos", "date": "2025-11-25", "time": "20:15:00 - 22:30:00" },
+                { "code": "ING", "session": "Sesión 7", "topic": "Impacto Social de la Tecnología y Blockchain", "date": "2025-11-27", "time": "18:00:00 - 20:15:00" },
+                { "code": "ING", "session": "Sesión 8", "topic": "Internet de las Cosas (IoT) y Revisión General", "date": "2025-11-27", "time": "20:15:00 - 22:30:00" },
+                { "code": "HP", "session": "Sesión 1", "topic": "Objetividad(es) y afectividad(es)", "date": "2025-11-05", "time": "18:00:00 - 20:15:00" },
+                { "code": "HP", "session": "Sesión 2", "topic": "Comprensión y liderazgo", "date": "2025-11-05", "time": "20:15:00 - 22:30:00" },
+                { "code": "HP", "session": "Sesión 3", "topic": "Gestión del conocimiento y cambio comportamental", "date": "2025-11-12", "time": "18:00:00 - 20:15:00" },
+                { "code": "HP", "session": "Sesión 4", "topic": "Innovación y creatividad", "date": "2025-11-12", "time": "20:15:00 - 22:30:00" },
+                { "code": "HP", "session": "Sesión 5", "topic": "Proyecto final", "date": "2025-11-19", "time": "18:00:00 - 20:15:00" },
+                { "code": "PY", "session": "Sesión 1", "topic": "Introducción a la Gestión de Proyectos", "date": "2025-11-13", "time": "18:00:00 - 20:15:00" },
+                { "code": "PY", "session": "Sesión 2", "topic": "Planificación y Organización de Proyectos", "date": "2025-11-13", "time": "20:15:00 - 22:30:00" },
+                { "code": "PY", "session": "Sesión 3", "topic": "Ejecución y Monitoreo de Proyectos", "date": "2025-11-14", "time": "18:00:00 - 20:15:00" },
+                { "code": "PY", "session": "Sesión 4", "topic": "Introducción a la Educación Financiera para Proyectos", "date": "2025-11-14", "time": "20:15:00 - 22:30:00" },
+                { "code": "PY", "session": "Sesión 5", "topic": "Gestión Financiera y Estrategias Básicas", "date": "2025-11-18", "time": "18:00:00 - 20:15:00" }
             ],
             "colors": {
                 "IA": "#005aeb",
@@ -1048,7 +721,7 @@
                     </p>
                 </div>
             `).join('');
-            
+
             eventModal.style.display = 'flex';
             setTimeout(() => {
                 modalContainer.classList.remove('scale-95', 'opacity-0');
@@ -1140,16 +813,16 @@
             const lastDay = new Date(year, month + 1, 0);
             const startDay = firstDay.getDay();
             const endDate = lastDay.getDate();
-    
+
             currentMonthDisplay.textContent = `${monthNames[month]} ${year}`;
             calendarGrid.innerHTML = '';
-    
+
             for (let i = 0; i < startDay; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.classList.add('day-cell', 'rounded-lg', 'bg-gray-50');
                 calendarGrid.appendChild(emptyCell);
             }
-    
+
             for (let i = 1; i <= endDate; i++) {
                 const dayCell = document.createElement('div');
                 dayCell.classList.add('day-cell', 'rounded-lg', 'bg-gray-50', 'shadow-sm');
@@ -1157,7 +830,7 @@
                 dayNumber.classList.add('text-sm', 'sm:text-lg', 'font-semibold', 'text-gray-900');
                 dayNumber.textContent = i;
                 dayCell.appendChild(dayNumber);
-    
+
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 const sessionsForDay = scheduleData.filter(s => s.date === dateKey);
 
@@ -1168,12 +841,12 @@
                     eventDiv.setAttribute('data-code', session.code);
                     eventDiv.textContent = session.topic;
                     eventDiv.title = `${session.session} - ${session.topic}`;
-                    
+
                     // Aplicar efecto de bounce con delay escalonado
                     setTimeout(() => {
                         eventDiv.classList.add('bounce-in');
                     }, index * 100);
-                    
+
                     eventDiv.addEventListener('click', (e) => {
                         e.stopPropagation();
                         // Efecto de pulse al hacer clic
@@ -1184,7 +857,7 @@
 
                     dayCell.appendChild(eventDiv);
                 });
-    
+
                 if (sessionsForDay.length > 0) {
                     dayCell.classList.add('cursor-pointer', 'hover:bg-blue-50', 'transition-colors', 'duration-200');
                     dayCell.addEventListener('click', () => {
@@ -1195,11 +868,16 @@
                 calendarGrid.appendChild(dayCell);
             }
         }
-    
+
         function animateCalendarChange(direction) {
+            // MODIFICACIÓN: Restringir la navegación a Octubre (9) y Noviembre (10) de 2025
+            if (currentYear !== 2025) return;
+            if (direction === 'next' && currentMonth === 10) return; // Máximo Noviembre
+            if (direction === 'prev' && currentMonth === 9) return;  // Mínimo Octubre
+
             // Aplicar efecto de zoom out
             calendarGrid.classList.add('calendar-zoom-out');
-            
+
             // Efecto de pulse en los botones
             if (direction === 'next') {
                 nextMonthBtn.classList.add('pulse-effect');
@@ -1208,27 +886,26 @@
                 prevMonthBtn.classList.add('pulse-effect');
                 setTimeout(() => prevMonthBtn.classList.remove('pulse-effect'), 300);
             }
-            
+
             setTimeout(() => {
                 if (direction === 'next') {
-                    currentMonth = (currentMonth + 1) % 12;
-                    if (currentMonth === 0) currentYear++;
+                    currentMonth++;
                 } else {
-                    currentMonth = (currentMonth - 1 + 12) % 12;
-                    if (currentMonth === 11) currentYear--;
+                    currentMonth--;
                 }
-                renderCalendar(currentMonth, currentYear);
                 
+                renderCalendar(currentMonth, currentYear);
+
                 // Aplicar efecto de zoom in
                 calendarGrid.classList.remove('calendar-zoom-out');
                 calendarGrid.classList.add('calendar-zoom-in');
-                
+
                 setTimeout(() => {
                     calendarGrid.classList.remove('calendar-zoom-in');
                 }, 400);
             }, 200);
         }
-    
+
         prevMonthBtn.addEventListener('click', () => animateCalendarChange('prev'));
         nextMonthBtn.addEventListener('click', () => animateCalendarChange('next'));
 
@@ -1258,14 +935,14 @@
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.classList.remove('active-filter');
                 });
-                
+
                 // Agregar clase activa al botón "Todas las Clases"
                 allButton.classList.add('active-filter');
-                
+
                 // Aplicar efecto de pulse
                 allButton.classList.add('filter-pulse');
                 setTimeout(() => allButton.classList.remove('filter-pulse'), 300);
-                
+
                 // Aplicar filtro
                 currentFilter = 'all';
                 applyFilter();
@@ -1279,26 +956,26 @@
                 button.style.backgroundColor = codeColors[code];
                 button.style.color = '#ffffff';
                 button.textContent = code;
-                
+
                 // Efecto de pulse al hacer clic
                 button.addEventListener('click', () => {
                     // Remover clase activa de todos los botones
                     document.querySelectorAll('.filter-btn').forEach(btn => {
                         btn.classList.remove('active-filter');
                     });
-                    
+
                     // Agregar clase activa al botón clickeado
                     button.classList.add('active-filter');
-                    
+
                     // Aplicar efecto de pulse
                     button.classList.add('filter-pulse');
                     setTimeout(() => button.classList.remove('filter-pulse'), 300);
-                    
+
                     // Aplicar filtro
                     currentFilter = code;
                     applyFilter();
                 });
-                
+
                 classButtons.appendChild(button);
             });
         }
@@ -1306,23 +983,26 @@
         function generateMiniatures() {
             miniaturesGrid.innerHTML = '';
             
-            for (let month = 0; month < 12; month++) {
+            // MODIFICACIÓN: Limitar a Octubre (9) y Noviembre (10)
+            const monthsToShow = [9, 10]; 
+
+            monthsToShow.forEach(month => { // Loop solo sobre Oct y Nov
                 const miniature = document.createElement('div');
                 miniature.className = 'miniature-calendar';
                 miniature.setAttribute('data-month', month);
-                
+
                 const monthName = monthNames[month];
                 const year = currentYear;
-                
+
                 // Crear header de la miniatura
                 const header = document.createElement('div');
                 header.className = 'miniature-header';
                 header.textContent = monthName;
-                
+
                 // Crear grid de días
                 const daysGrid = document.createElement('div');
                 daysGrid.className = 'miniature-days';
-                
+
                 // Agregar headers de días de la semana
                 const dayHeaders = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
                 dayHeaders.forEach(day => {
@@ -1331,56 +1011,56 @@
                     dayHeader.textContent = day;
                     daysGrid.appendChild(dayHeader);
                 });
-                
+
                 // Generar días del mes
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const startDay = firstDay.getDay();
                 const endDate = lastDay.getDate();
-                
+
                 // Agregar días vacíos al inicio
                 for (let i = 0; i < startDay; i++) {
                     const emptyDay = document.createElement('div');
                     emptyDay.className = 'miniature-day miniature-day-empty';
                     daysGrid.appendChild(emptyDay);
                 }
-                
+
                 // Agregar días del mes
                 for (let i = 1; i <= endDate; i++) {
                     const dayCell = document.createElement('div');
                     dayCell.className = 'miniature-day miniature-day-number';
                     dayCell.textContent = i;
-                    
+
                     // Verificar si hay eventos en este día
                     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                     const sessionsForDay = scheduleData.filter(s => s.date === dateKey);
-                    
+
                     if (sessionsForDay.length > 0) {
                         dayCell.classList.remove('miniature-day-number');
                         dayCell.classList.add('miniature-day-event');
-                        
+
                         // Aplicar color del primer evento del día y agregar data-code
                         const firstEvent = sessionsForDay[0];
                         dayCell.style.backgroundColor = codeColors[firstEvent.code] || '#3b82f6';
                         dayCell.setAttribute('data-code', firstEvent.code);
                     }
-                    
+
                     daysGrid.appendChild(dayCell);
                 }
-                
+
                 miniature.appendChild(header);
                 miniature.appendChild(daysGrid);
-                
+
                 // Evento de clic para expandir la miniatura
                 miniature.addEventListener('click', () => {
                     currentMonth = month;
                     currentYear = year;
                     showFullCalendarView();
                 });
-                
+
                 miniaturesGrid.appendChild(miniature);
-            }
-            
+            });
+
             // Aplicar filtro actual después de generar las miniaturas
             if (currentFilter !== 'all') {
                 applyFilter();
@@ -1392,10 +1072,10 @@
             fullCalendarView.classList.remove('hidden');
             fullCalendarView.classList.add('view-transition');
             currentView = 'full';
-            
+
             // Renderizar el calendario completo
             renderCalendar(currentMonth, currentYear);
-            
+
             // Aplicar filtro actual si existe
             if (currentFilter !== 'all') {
                 applyFilter();
@@ -1407,7 +1087,7 @@
             miniaturesView.classList.remove('hidden');
             miniaturesView.classList.add('view-transition');
             currentView = 'miniatures';
-            
+
             // Regenerar miniaturas para reflejar cambios
             generateMiniatures();
         }
@@ -1415,10 +1095,10 @@
         function applyFilter() {
             // Aplicar filtro a eventos en vista completa
             const events = document.querySelectorAll('.event');
-            
+
             events.forEach(event => {
                 const eventCode = event.getAttribute('data-code');
-                
+
                 if (currentFilter === 'all' || eventCode === currentFilter) {
                     event.classList.remove('event-hidden');
                     event.classList.add('event-filtered');
@@ -1427,13 +1107,13 @@
                     event.classList.remove('event-filtered');
                 }
             });
-            
+
             // Aplicar filtro a miniaturas
             const miniatureDays = document.querySelectorAll('.miniature-day-event');
-            
+
             miniatureDays.forEach(day => {
                 const dayCode = day.getAttribute('data-code');
-                
+
                 if (currentFilter === 'all' || dayCode === currentFilter) {
                     day.style.opacity = '1';
                     day.style.visibility = 'visible';
@@ -1444,7 +1124,7 @@
                     day.style.transform = 'scale(0.8)';
                 }
             });
-            
+
             // Remover clase de animación después de completar
             setTimeout(() => {
                 events.forEach(event => {
@@ -1461,7 +1141,7 @@
                 codeColors = data.colors;
                 generateClassFilterButtons();
                 generateMiniatures();
-                
+
                 if (currentView === 'full') {
                     renderCalendar(currentMonth, currentYear);
                 }
@@ -1470,7 +1150,7 @@
                 scheduleData = [];
                 codeColors = {};
                 generateMiniatures();
-                
+
                 if (currentView === 'full') {
                     renderCalendar(currentMonth, currentYear);
                 }
@@ -1482,7 +1162,7 @@
         function initializeApp() {
             classFilter.style.display = 'block';
             calendarView.classList.add('active-view');
-            
+
             // Cargar datos y mostrar miniaturas
             loadScheduleFromJSON();
         }
