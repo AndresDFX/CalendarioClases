@@ -459,9 +459,14 @@
             <div id="miniatures-view" class="mb-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-blue-700">Vista General (Octubre - Noviembre 2025)</h2>
-                    <button id="expand-calendar-btn" class="px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors duration-200 focus:outline-none text-sm shimmer-effect">
-                        📅 Vista Completa
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="export-ics-btn-mini" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200 focus:outline-none text-xs sm:text-sm text-center shimmer-effect">
+                            Añadir al Calendario
+                        </button>
+                        <button id="expand-calendar-btn" class="px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors duration-200 focus:outline-none text-sm shimmer-effect">
+                            📅 Vista Completa
+                        </button>
+                    </div>
                 </div>
                 <div id="miniatures-grid" class="grid grid-cols-2 gap-4"> 
                     </div>
@@ -580,6 +585,7 @@
         const prevMonthBtn = document.getElementById('prev-month');
         const nextMonthBtn = document.getElementById('next-month');
         const exportIcsBtn = document.getElementById('export-ics-btn');
+        const exportIcsBtnMini = document.getElementById('export-ics-btn-mini');
 
 
         const eventModal = document.getElementById('event-modal');
@@ -806,6 +812,7 @@
         }
 
         exportIcsBtn.addEventListener('click', generateICSFile);
+        if (exportIcsBtnMini) exportIcsBtnMini.addEventListener('click', generateICSFile);
 
 
         function renderCalendar(month, year) {
